@@ -1,10 +1,10 @@
+import re
 import logging
 import PySimpleGUI as sg
 from time import sleep, time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import PySimpleGUI as sg
 from threading import Thread
 
 class LoginScreen:
@@ -66,67 +66,67 @@ class Controller:
 
         self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl')
 
-        sleep(1)
+        sleep(0.2)
         self.navigator.find_element(By.NAME, 'User').send_keys(self.user)
         self.navigator.find_element(By.NAME, 'Password').send_keys(self.password + Keys.ENTER)
 
-        sleep(1)
+        sleep(0.2)
         self.user = None
         self.password = None
 
     def pesquisarPorLink(self, chamado):
         self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID='+ str(chamado))
-        sleep(1)
+        sleep(0.5)
         self.navigator.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
     
     def adicionarIc(self, chamado):
         self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentLinkObject;SourceObject=Ticket;SourceKey='+ str(chamado))
-        sleep(1)
+        sleep(0.2)
 
     def servidoresVirtuais(self, servidor):
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys('servidores virtuais')
-        sleep(1)
+        sleep(0.2)
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys(Keys.ARROW_DOWN + Keys.ARROW_DOWN + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'SEARCH::Name').send_keys(servidor + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'LinkTargetKeys').click()
         self.navigator.find_element(By.ID, 'AddLinks').click()
 
     def bibliotecaDeSoftware(self):
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys('desktop')
-        sleep(1)
+        sleep(0.2)
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys(Keys.ARROW_DOWN + Keys.ARROW_DOWN + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'SEARCH::Name').send_keys('biblioteca' + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'LinkTargetKeys').click()
         self.navigator.find_element(By.ID, 'AddLinks').click()
 
     def patrimonio(self, patrimonio):
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys('desktop')
-        sleep(1)
+        sleep(0.2)
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys(Keys.ARROW_DOWN + Keys.ARROW_DOWN + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'SEARCH::Name').send_keys(patrimonio + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'LinkTargetKeys').click()
         self.navigator.find_element(By.ID, 'AddLinks').click()
 
     def caixasPostais(self, usuario):
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys('caixas postais')
-        sleep(1)
+        sleep(0.2)
         self.navigator.find_element(By.ID, 'TargetIdentifier_Search').send_keys(Keys.ARROW_DOWN + Keys.ARROW_DOWN + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'SEARCH::Name').send_keys(usuario + Keys.ENTER)
-        sleep(1)
+        sleep(0.2)
 
         self.navigator.find_element(By.ID, 'LinkTargetKeys').click()
         self.navigator.find_element(By.ID, 'AddLinks').click()
@@ -149,25 +149,15 @@ class Controller:
             return None
 
     def verificaPatrimonio(self):
-        info = self.getInfoChamado()
-        patrimonio = None
         try:
-            for i in info.split('\n'):
-                if 'patrimonio' in i.casefold() or 'patrimônio' in i.casefold():
-                    if ':' in i:
-                        patrimonio = i.split(':')[1]
-                    elif len(i.strip().split(' ')) == 2:
-                        patrimonio = i.split(' ')[1]
-                    elif len(i.strip().split(' ')) > 2:
-                        patrimonio = i.split('nio')[1]
-                        if len(patrimonio.split(' ')) > 2:
-                            patrimonio = patrimonio.strip().split(' ')[0]
-
-                    patrimonio = patrimonio.strip().replace('.','').replace(',','').replace(';','').replace(' ','')
-                    return patrimonio
+            info = self.getInfoChamado()
+            rex = "\D*([0-5]\d{2}[.]?\d{3,5})"
+            patrimonio = re.findall(rex, info)
+            for i in range(len(patrimonio)):
+                patrimonio[i] = patrimonio[i].replace('.','')
+            return patrimonio
         except:
             return None
-        return None
     
     def addConcluido(self, chamdo):
         self.__concluidos.append(chamdo)
@@ -260,6 +250,7 @@ if __name__ == '__main__':
         [sg.Text('4 - Desativar conta')],
         [sg.Text('5 - Criação de conta')],
         [sg.Text('6 - Patrimônio (Informe o patrimônio antes de escolher esta opção)'), sg.InputText(key='patrimonio', size=(15,0),)],
+        [sg.Text('66 - Patrimônio(s) encontrado(s)'), sg.Combo(key = 'comboPatrimonio', values=[], size=(15,0))],
         [sg.Text('7 - Inserir manualmente'), sg.Button('Prosseguir', key='prosseguir', disabled=True)],
         [sg.Text('8 - Caixas postais')],
         [sg.Text('9 - Pular')],
@@ -278,8 +269,11 @@ if __name__ == '__main__':
             usuario = controller.getUsuario()
             
             try:
-                if index != 0 and value['patrimonio'] != '' or not value['patrimonio'] != None:
-                    window['patrimonio']('') #Limpa o campo patrimônio
+                if index != 0:
+                    if value['patrimonio'] != '' or value['patrimonio'] != None:
+                        window['patrimonio']('') #Limpa o campo patrimônio
+                    if value['comboPatrimonio'] or value['comboPatrimonio'] != None:
+                        window['comboPatrimonio']([])
                     window.refresh()
             except:
                 pass
@@ -287,7 +281,8 @@ if __name__ == '__main__':
             patrimonio = controller.verificaPatrimonio()
             if patrimonio:
                 try:
-                    window['patrimonio'](str(patrimonio))
+                    window['comboPatrimonio'].Update(values = patrimonio)
+                    window['comboPatrimonio'](patrimonio[0])
                 except:
                     pass
 
@@ -302,7 +297,7 @@ if __name__ == '__main__':
             window['option']('')
             window.refresh()
 
-            if option >= 0 and option <= 9:
+            if option >= 0 and option <= 9 or option == 66:
                 if option != 0:
                     if option != 9: controller.adicionarIc(chamado)
                     controller.addConcluido(chamado)
@@ -320,6 +315,10 @@ if __name__ == '__main__':
                             controller.servidoresVirtuais('SDFURA0117')
                         elif option == 6:
                             patrimonio = value['patrimonio']
+                            controller.patrimonio(patrimonio)
+                            window.refresh()
+                        elif option == 66:
+                            patrimonio = value['comboPatrimonio']
                             controller.patrimonio(patrimonio)
                             window.refresh()
                         elif option == 7:
@@ -373,10 +372,7 @@ if __name__ == '__main__':
 
     window = sg.Window('Finalizado', layout)
 
-    while True:
-        event, value = window.read()
+    event, value = window.read()
 
-        if event == sg.WIN_CLOSED:
-            break
 
     controller.fecharNavegador()

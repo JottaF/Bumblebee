@@ -1,0 +1,21 @@
+Foram inseridos 20 IC's.
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200015
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=20001
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200043
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200008
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200044
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200067
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=20004
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200035
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200060
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=20000
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=2000
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200000
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200034
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200055
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200066
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200041
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200007
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200006
+https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200028

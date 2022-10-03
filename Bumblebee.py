@@ -46,6 +46,7 @@ class Controller:
     __concluidos = []
     __inicio = time()
     __fim = None
+    login = None
 
     for i in content:
         try:
@@ -58,21 +59,25 @@ class Controller:
         self.login = self.window.login()
         self.window.close()
 
-        self.user = self.login[0]
-        self.password = self.login[1]
+        if self.login:
+            self.user = self.login[0]
+            self.password = self.login[1]
 
-        self.navigator = webdriver.Chrome()
-        self.navigator.maximize_window()
+            self.navigator = webdriver.Chrome()
+            self.navigator.maximize_window()
 
-        self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl')
+            self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl')
 
-        sleep(0.2)
-        self.navigator.find_element(By.NAME, 'User').send_keys(self.user)
-        self.navigator.find_element(By.NAME, 'Password').send_keys(self.password + Keys.ENTER)
+            sleep(0.2)
+            self.navigator.find_element(By.NAME, 'User').send_keys(self.user)
+            self.navigator.find_element(By.NAME, 'Password').send_keys(self.password + Keys.ENTER)
 
-        sleep(0.2)
-        self.user = None
-        self.password = None
+            sleep(0.2)
+            self.user = None
+            self.password = None
+            self.login = True
+        else:
+            self.loging = False
 
     def pesquisarPorLink(self, chamado):
         self.navigator.get('https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID='+ str(chamado))
@@ -151,7 +156,7 @@ class Controller:
     def verificaPatrimonio(self):
         try:
             info = self.getInfoChamado()
-            rex = "\D*([0-5]\d{2}[.]?\d{3,5})"
+            rex = r"[0-5]\d{2}[.]?\d{3,5}"
             patrimonio = re.findall(rex, info)
             for i in range(len(patrimonio)):
                 patrimonio[i] = patrimonio[i].replace('.','')
@@ -217,6 +222,9 @@ class Controller:
             return False
         except:
             return True
+
+    def getNavegador(self):
+        return self.navigator
     
     def fecharNavegador(self):
         self.navigator.close()
@@ -234,145 +242,146 @@ class SalvarProcesso(Thread):
 if __name__ == '__main__':
     controller = Controller()
 
-    option = -1
-    index = 0
-    button = None
-    usuario = None
+    if controller.login:
+        option = -1
+        index = 0
+        button = None
+        usuario = None
 
-    chamado = controller.getChamado(index)
+        chamado = controller.getChamado(index)
 
-    sg.theme('DarkGrey13')
-    layout = [
-        [sg.Text('Escolha o IC a ser inserido:', size=(20,0))],
-        [sg.Text('1 - Reset de Senha')],
-        [sg.Text('2 - Biblioteca de Software')],
-        [sg.Text('3 - Alteração na conta')],
-        [sg.Text('4 - Desativar conta')],
-        [sg.Text('5 - Criação de conta')],
-        [sg.Text('6 - Patrimônio (Informe o patrimônio antes de escolher esta opção)'), sg.InputText(key='patrimonio', size=(15,0),)],
-        [sg.Text('66 - Patrimônio(s) encontrado(s)'), sg.Combo(key = 'comboPatrimonio', values=[], size=(15,0))],
-        [sg.Text('7 - Inserir manualmente'), sg.Button('Prosseguir', key='prosseguir', disabled=True)],
-        [sg.Text('8 - Caixas postais')],
-        [sg.Text('9 - Pular')],
-        [sg.InputText(key='option', focus=True), sg.Button('Selecionar', key='selecionar', bind_return_key=True)],
-        [sg.Button('Encerrar')]
-    ]
+        sg.theme('DarkGrey13')
+        layout = [
+            [sg.Text('Escolha o IC a ser inserido:', size=(20,0))],
+            [sg.Text('1 - Reset de Senha')],
+            [sg.Text('2 - Biblioteca de Software')],
+            [sg.Text('3 - Alteração na conta')],
+            [sg.Text('4 - Desativar conta')],
+            [sg.Text('5 - Criação de conta')],
+            [sg.Text('6 - Patrimônio (Informe o patrimônio antes de escolher esta opção)'), sg.InputText(key='patrimonio', size=(15,0),)],
+            [sg.Text('66 - Patrimônio(s) encontrado(s)'), sg.Combo(key = 'comboPatrimonio', values=[], size=(15,0))],
+            [sg.Text('7 - Inserir manualmente'), sg.Button('Prosseguir', key='prosseguir', disabled=True)],
+            [sg.Text('8 - Caixas postais')],
+            [sg.Text('9 - Pular')],
+            [sg.InputText(key='option', focus=True), sg.Button('Selecionar', key='selecionar', bind_return_key=True)],
+            [sg.Button('Encerrar')]
+        ]
 
 
-    if controller.verificarLogin():
-        window = sg.Window('Bumblebee', layout, finalize = True)
-        total = controller.getTotal()
+        if controller.verificarLogin():
+            window = sg.Window('Bumblebee', layout, finalize = True)
+            total = controller.getTotal()
 
-        while True and int(option) != 0 and index < int(total):
-            chamado = controller.getChamado(index)
-            controller.pesquisarPorLink(chamado)
-            usuario = controller.getUsuario()
-            
-            try:
-                if index != 0:
-                    if value['patrimonio'] != '' or value['patrimonio'] != None:
-                        window['patrimonio']('') #Limpa o campo patrimônio
-                    if value['comboPatrimonio'] or value['comboPatrimonio'] != None:
-                        window['comboPatrimonio']([])
-                    window.refresh()
-            except:
-                pass
-
-            patrimonio = controller.verificaPatrimonio()
-            if patrimonio:
+            while True and int(option) != 0 and index < int(total):
+                chamado = controller.getChamado(index)
+                controller.pesquisarPorLink(chamado)
+                usuario = controller.getUsuario()
+                
                 try:
-                    window['comboPatrimonio'].Update(values = patrimonio)
-                    window['comboPatrimonio'](patrimonio[0])
+                    if index != 0:
+                        if value['patrimonio'] != '' or value['patrimonio'] != None:
+                            window['patrimonio']('') #Limpa o campo patrimônio
+                        if value['comboPatrimonio'] or value['comboPatrimonio'] != None:
+                            window['comboPatrimonio']([])
+                        window.refresh()
                 except:
                     pass
 
-            button, value = window.read()
-
-            if button == 'Encerrar' or button == sg.WIN_CLOSED:
-                controller.removerICsConcluidosDaLista()
-                break
-
-            option = int(value['option']) if value['option'] != '' else -1
-
-            window['option']('')
-            window.refresh()
-
-            if option >= 0 and option <= 9 or option == 66:
-                if option != 0:
-                    if option != 9: controller.adicionarIc(chamado)
-                    controller.addConcluido(chamado)
-                    
+                patrimonio = controller.verificaPatrimonio()
+                if patrimonio:
                     try:
-                        if option == 1:
-                            controller.servidoresVirtuais('SDFURA0031')
-                        elif option == 2:
-                            controller.bibliotecaDeSoftware()
-                        elif option == 3:
-                            controller.servidoresVirtuais('SDF0432')
-                        elif option == 4:
-                            controller.servidoresVirtuais('SDF0814')
-                        elif option == 5:
-                            controller.servidoresVirtuais('SDFURA0117')
-                        elif option == 6:
-                            patrimonio = value['patrimonio']
-                            controller.patrimonio(patrimonio)
-                            window.refresh()
-                        elif option == 66:
-                            patrimonio = value['comboPatrimonio']
-                            controller.patrimonio(patrimonio)
-                            window.refresh()
-                        elif option == 7:
-                            window['prosseguir'].Update(disabled = False)
-                            window['selecionar'].Update(disabled = True)
-                            while button != 'prosseguir':
-                                button, value = window.read()
-                            window['prosseguir'].Update(disabled = True)
-                            window['selecionar'].Update(disabled = False)
-                        elif option == 8:
-                            controller.caixasPostais(str(usuario))
-                        elif option > 9:
-                            controller.removeConcluido()
+                        window['comboPatrimonio'].Update(values = patrimonio)
+                        window['comboPatrimonio'](patrimonio[0])
                     except:
-                        controller.removeConcluido()
+                        pass
+
+                button, value = window.read()
+
+                if button == 'Encerrar' or button == sg.WIN_CLOSED:
+                    controller.removerICsConcluidosDaLista()
+                    break
+
+                option = int(value['option']) if value['option'] != '' else -1
+
+                window['option']('')
+                window.refresh()
+
+                if option >= 0 and option <= 9 or option == 66:
+                    if option != 0:
+                        if option != 9: controller.adicionarIc(chamado)
+                        controller.addConcluido(chamado)
                         
-                        index -= 1
-                    
-                    index += 1
-            
-            if index != 0 and index % 5 == 0:        # A cada 5 IC's inseridos o programa atualizará 
-                SalvarProcesso(controller).start()   # os arquivos ics.txt e chamados_concluidos.txt
-                total = controller.getTotal()
-                index = 0
+                        try:
+                            if option == 1:
+                                controller.servidoresVirtuais('SDFURA0031')
+                            elif option == 2:
+                                controller.bibliotecaDeSoftware()
+                            elif option == 3:
+                                controller.servidoresVirtuais('SDF0432')
+                            elif option == 4:
+                                controller.servidoresVirtuais('SDF0814')
+                            elif option == 5:
+                                controller.servidoresVirtuais('SDFURA0117')
+                            elif option == 6:
+                                patrimonio = value['patrimonio']
+                                controller.patrimonio(patrimonio)
+                                window.refresh()
+                            elif option == 66:
+                                patrimonio = value['comboPatrimonio']
+                                controller.patrimonio(patrimonio)
+                                window.refresh()
+                            elif option == 7:
+                                window['prosseguir'].Update(disabled = False)
+                                window['selecionar'].Update(disabled = True)
+                                while button != 'prosseguir':
+                                    button, value = window.read()
+                                window['prosseguir'].Update(disabled = True)
+                                window['selecionar'].Update(disabled = False)
+                            elif option == 8:
+                                controller.caixasPostais(str(usuario))
+                            elif option > 9:
+                                controller.removeConcluido()
+                        except:
+                            controller.removeConcluido()
+                            
+                            index -= 1
+                        
+                        index += 1
+                
+                if index != 0 and index % 5 == 0:        # A cada 5 IC's inseridos o programa atualizará 
+                    SalvarProcesso(controller).start()   # os arquivos ics.txt e chamados_concluidos.txt
+                    total = controller.getTotal()
+                    index = 0
 
-        controller.removerICsConcluidosDaLista()
+            controller.removerICsConcluidosDaLista()
 
-    else:
+        else:
+            layout = [
+                [sg.Text('Falha ao efetuar login!!!', text_color='red',size=(20,3))],
+            ]
+
+            window = sg.Window('Falha', layout)
+
+            while True:
+                event, value = window.read()
+
+                if event == sg.WIN_CLOSED:
+                    break
+                
+
+
+        controller.criarListaConcluidos()
+        controller.setFim()
+        duracao = controller.getDuracao()
+
         layout = [
-            [sg.Text('Falha ao efetuar login!!!', text_color='red',size=(20,3))],
+            [sg.Text('Inclusão de IC finalizada!!!', text_color='green',size=(20,3))],
+            [sg.Text('Duração: '), sg.Text(f'{duracao:.2f} minutos')],
         ]
 
-        window = sg.Window('Falha', layout)
+        window = sg.Window('Finalizado', layout)
 
-        while True:
-            event, value = window.read()
-
-            if event == sg.WIN_CLOSED:
-                break
-            
+        event, value = window.read()
 
 
-    controller.criarListaConcluidos()
-    controller.setFim()
-    duracao = controller.getDuracao()
-
-    layout = [
-        [sg.Text('Inclusão de IC finalizada!!!', text_color='green',size=(20,3))],
-        [sg.Text('Duração: '), sg.Text(f'{duracao:.2f} minutos')],
-    ]
-
-    window = sg.Window('Finalizado', layout)
-
-    event, value = window.read()
-
-
-    controller.fecharNavegador()
+        controller.fecharNavegador()

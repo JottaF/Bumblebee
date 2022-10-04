@@ -156,7 +156,7 @@ class Controller:
     def verificaPatrimonio(self):
         try:
             info = self.getInfoChamado()
-            rex = r"[0-5]\d{2}[.]?\d{3,5}"
+            rex = r"[\s|[a-zA-Z]]?([0-5]\d{2}[.]?\d{3,5})"
             patrimonio = re.findall(rex, info)
             for i in range(len(patrimonio)):
                 patrimonio[i] = patrimonio[i].replace('.','')
@@ -258,8 +258,7 @@ if __name__ == '__main__':
             [sg.Text('3 - Alteração na conta')],
             [sg.Text('4 - Desativar conta')],
             [sg.Text('5 - Criação de conta')],
-            [sg.Text('6 - Patrimônio (Informe o patrimônio antes de escolher esta opção)'), sg.InputText(key='patrimonio', size=(15,0),)],
-            [sg.Text('66 - Patrimônio(s) encontrado(s)'), sg.Combo(key = 'comboPatrimonio', values=[], size=(15,0))],
+            [sg.Text('6 - Patrimônio'), sg.Combo(key = 'comboPatrimonio', values=[], size=(15,0))],
             [sg.Text('7 - Inserir manualmente'), sg.Button('Prosseguir', key='prosseguir', disabled=True)],
             [sg.Text('8 - Caixas postais')],
             [sg.Text('9 - Pular')],
@@ -279,10 +278,7 @@ if __name__ == '__main__':
                 
                 try:
                     if index != 0:
-                        if value['patrimonio'] != '' or value['patrimonio'] != None:
-                            window['patrimonio']('') #Limpa o campo patrimônio
-                        if value['comboPatrimonio'] or value['comboPatrimonio'] != None:
-                            window['comboPatrimonio']([])
+                        window['comboPatrimonio']([])
                         window.refresh()
                 except:
                     pass
@@ -323,10 +319,6 @@ if __name__ == '__main__':
                             elif option == 5:
                                 controller.servidoresVirtuais('SDFURA0117')
                             elif option == 6:
-                                patrimonio = value['patrimonio']
-                                controller.patrimonio(patrimonio)
-                                window.refresh()
-                            elif option == 66:
                                 patrimonio = value['comboPatrimonio']
                                 controller.patrimonio(patrimonio)
                                 window.refresh()

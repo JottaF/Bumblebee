@@ -1,3 +1,0 @@
-Foram inseridos 2 IC's.
-https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=200068
-https://suportedti.agu.gov.br/otrs/index.pl?Action=AgentTicketZoom;TicketID=20007
